@@ -748,6 +748,18 @@ mod tests {
     }
 
     #[test]
+    fn with_details() {
+        // A non-empty details field should be preserved verbatim regardless of its content
+        const TEST_CASES: &[&[u8]] = &[b"", b"1", b"foo", b"this should also work", &[0u8; 1000]];
+
+        for details in TEST_CASES {
+            let status = Status::with_details(Code::Cancelled, "foo", Bytes::from_static(details));
+            let status = Status::from_header_map(&status.to_header_map().unwrap()).unwrap();
+            assert_eq!(*details, status.details())
+        }
+    }
+
+    #[test]
     fn constructors() {
         assert_eq!(Status::ok("").code(), Code::Ok);
         assert_eq!(Status::cancelled("").code(), Code::Cancelled);
